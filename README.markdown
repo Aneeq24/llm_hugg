@@ -12,7 +12,7 @@ A web-based application powered by a large language model (Mistral-7B) to genera
 - Python 3.11
 - A Hugging Face account and API token for model access
 - A Stable Diffusion API key (optional for diagram generation)
-- GPU (recommended for faster LLM inference)
+- Mac with Apple Silicon (M1/M2/M3) or GPU (recommended for faster inference)
 
 ## Setup Instructions
 1. Clone the repository:
@@ -34,6 +34,7 @@ A web-based application powered by a large language model (Mistral-7B) to genera
      ```bash
      echo "HUGGINGFACE_TOKEN=hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" > .env
      echo "STABLE_DIFFUSION_API_KEY=your-api-key-here" >> .env
+     echo "PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.0" >> .env
      ```
 5. Authenticate with Hugging Face:
    ```bash
@@ -53,13 +54,18 @@ A web-based application powered by a large language model (Mistral-7B) to genera
 4. Submit to view the study plan, answer, and diagram (if requested).
 
 ## Troubleshooting
-- **Dependency Conflicts**: Ensure all packages match `requirements.txt`. Reinstall if needed:
+- **Dependency Conflicts**: Ensure all packages match `requirements.txt`:
   ```bash
   pip uninstall transformers huggingface_hub tokenizers accelerate datasets peft safetensors requests -y
   pip install -r requirements.txt
   ```
 - **Gated Model Error**: Request access to Mistral-7B at https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2 and use a valid Hugging Face token.
-- **Cache Issues**: Clear the Hugging Face cache if model loading fails:
+- **MPS Out-of-Memory Error**: Use 4-bit quantization (already in `llm_utils.py`) or switch to `distilgpt2`:
+  ```python
+  MODEL_NAME = "distilgpt2"  # Update in llm_utils.py
+  ```
+  - Alternatively, run on CPU by setting `device_map="cpu"` in `llm_utils.py`.
+- **Cache Issues**: Clear the Hugging Face cache:
   ```bash
   rm -rf ~/.cache/huggingface/hub
   ```
@@ -72,9 +78,10 @@ A web-based application powered by a large language model (Mistral-7B) to genera
 - `README.md`: Project documentation.
 
 ## Notes
-- Mistral-7B requires a Hugging Face token. For testing, use `distilgpt2` by updating `MODEL_NAME` in `llm_utils.py`.
+- Mistral-7B requires a Hugging Face token and uses 4-bit quantization for MPS compatibility.
+- For low-memory devices, use `distilgpt2` by updating `MODEL_NAME` in `llm_utils.py`.
 - Diagram generation requires a Stable Diffusion API key.
-- For faster inference, use a GPU with at least 12GB VRAM.
+- For faster inference, use a Mac with 16GB+ unified memory.
 
 ## Future Improvements
 - Fine-tune the LLM on a curated educational dataset.
